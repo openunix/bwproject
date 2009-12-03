@@ -29,4 +29,4 @@ bwhal/			DO NOT TOUCH
  */
 3. The prefix of all the external functions should be bwlib_ or bwoss_. For example bwlib_rb_insert().
 4. Use .c and .h, not .cpp or .h
-
+5. bwoss/lin_kmod/bwlib_wrapper.h - An example of bwoss/bwoss_iface.h and bwlib.h.
