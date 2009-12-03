@@ -1,0 +1,32 @@
+bwlib.h			The declaration of radix tree, rbtree, etc...
+bwosl/			BWFS Operating System Layer
+bwosl/win_user/		* Project Files for VC2005/VC6 and test cases...
+bwosl/lin_user/		Makefile, cunit test cases
+bwoss/			BWFS Operating System Service
+bwoss/bwoss_iface.h	* Interface of the overall bwoss
+bwoss/lin_kmod/		Implements for Linux Kernel
+bwoss/lin_user/		Implements for Linux User Space (POSIX)
+bwoss/win_user/		* Implements for Windows User Space
+rbtree/			OS independence implements of red-black tree
+radixtree/		OS independence implements of radix tree
+bwhal/			DO NOT TOUCH
+
+1. All comments need to be in English and in /*  */, NOT //
+2. All the header in the file should be like:
+/*
+ * Copyright (c) 2009 Institute of Computing Technology
+ *               Information Technologies Co., Ltd
+ *
+ * bwlib_wrapper.h - A wrap-layer of bwlib in Linux Kernel
+ *
+ * Author:       Feng Shuo
+ * Dependencies: linux/rbtree.h
+ *
+ * ChangeLog:
+ *  2009-12-2 Initial Created
+ * ToDo:
+ *  None
+ */
+3. The prefix of all the external functions should be bwlib_ or bwoss_. For example bwlib_rb_insert().
+4. Use .c and .h, not .cpp or .h
+
