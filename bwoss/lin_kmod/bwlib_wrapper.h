@@ -26,7 +26,7 @@
 
 /* bwoss_iface.h */
 typedef spinlock_t bwoss_spinlock_t;
-typedef unsigned long bwoss_irql_t;
+typedef uint32_t bwoss_irql_t;
 static inline void bwoss_spin_lock(bwoss_spinlock_t *l)
 {
 	spin_lock(l);
