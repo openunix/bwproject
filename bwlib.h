@@ -40,7 +40,7 @@ typedef struct bwlib_rb_root{
 }bwlib_rb_root_t;
 
  
-bwlib_rb_node_t null_node = {
+static bwlib_rb_node_t null_node = {
 	0,NULL,NULL
 };
 
