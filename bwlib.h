@@ -30,6 +30,7 @@
 
 typedef struct bwlib_rb_node{
 	/* TODO: Add the define of rb node here */
+	int key;
 	unsigned long parent;
 	struct bwlib_rb_node *rb_left, *rb_right;
 }bwlib_rb_node_t;
@@ -38,11 +39,6 @@ typedef struct bwlib_rb_root{
 	/* TODO: Add the define of rb root node here */
 	bwlib_rb_node_t *root_node;	
 }bwlib_rb_root_t;
-
- 
-static bwlib_rb_node_t null_node = {
-	0,NULL,NULL
-};
 
 
 extern int bwlib_rb_init(bwlib_rb_root_t *);
@@ -70,6 +66,7 @@ extern void bwlib_rb_link_node(bwlib_rb_node_t *, bwlib_rb_node_t *,
 #define rb_is_black(x) (rb_color(x))
 
 #define is_null_node(x) ((x) == &null_node)
+
 
 /* 
  * TODO: Add the radix tree define here.
