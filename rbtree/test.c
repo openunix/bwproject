@@ -25,7 +25,6 @@ bwlib_rb_node_t *rb_lookup(bwlib_rb_root_t *root, int key)
 	int key0;
 	p = root -> root_node;
 	while (!is_null_node(p)) {
-		//key0 = bwlib_rb_entry(p, mynode, node)->key;
 		key0 = rb_key(p);
 		if ( key == key0) {
 			break;
@@ -44,7 +43,6 @@ int rb_insert(bwlib_rb_root_t *root, bwlib_rb_node_t *node)
 {
 	bwlib_rb_node_t *p, *pp;
 	int key0;
-//	int key = bwlib_rb_entry(node, mynode, node)->key;
 	int key = rb_key(node);
 
 	if (is_null_node(root->root_node)) {
@@ -59,7 +57,6 @@ int rb_insert(bwlib_rb_root_t *root, bwlib_rb_node_t *node)
 	pp = &null_node;
 	while (!is_null_node(p)) {
 		pp = p;
-		//key0 = bwlib_rb_entry(p, mynode, node)->key;
 		key0 = rb_key(p);
 		if (key == key0) {
 			return KEY_EXIST;
@@ -71,7 +68,6 @@ int rb_insert(bwlib_rb_root_t *root, bwlib_rb_node_t *node)
 		}
 	}
 	
-	//key0 = bwlib_rb_entry(pp, mynode, node)->key;
 	key0 = rb_key(pp);
 	if (key < key0) {
 		pp->rb_left = node;

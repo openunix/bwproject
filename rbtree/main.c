@@ -25,6 +25,8 @@ int main()
 		rb_insert(&r, p);
 	}
 
+	printf("first: %d, last: %d\n", rb_key(bwlib_rb_first(&r)), rb_key(bwlib_rb_last(&r)));
+	printf("second: %d, second last: %d\n", rb_key(bwlib_rb_next(bwlib_rb_first(&r))), rb_key(bwlib_rb_prev(bwlib_rb_last(&r))));
 	for (i = 1; i <= N; i++) {
 		//p = rb_lookup(&r, i);
 		//printf("%d\n", p->key);
