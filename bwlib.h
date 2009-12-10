@@ -19,9 +19,10 @@
   * 
   * Author:  
   */
-
+#include <stdio.h>
 #ifndef _BWLIB_H
 #define _BWLIB_H
+
 
 /* 
  * Attention: We wouldn't include any bwoss layer header here. Do this
@@ -56,7 +57,7 @@ extern void bwlib_rb_link_node(bwlib_rb_node_t *, bwlib_rb_node_t *,
 #define EMPTY_ROOT -2
 #define container_of(ptr, type, member) ((type *)((char *)ptr - (char *)&((type *)0)->member))
 #define bwlib_rb_entry(ptr, type, member) container_of(ptr, type, member) 
-#define BWLIB_RB_ROOT (bwlib_rb_root_t) { NULL,} 
+#define BWLIB_RB_ROOT (bwlib_rb_root_t) { NULL} 
 /*
 #define rb_color(x) ((x)->parent & 3)
 #define rb_parent(x) ((bwlib_rb_node_t *)((x)->parent & (~3)))
