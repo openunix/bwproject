@@ -77,5 +77,5 @@
 /* 
  * Common external fuctions and macros
  */
-
+/*
 #endif /* _BWOSS_IFACE_H */
