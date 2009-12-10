@@ -7,12 +7,13 @@
 #include "../bwlib.h"
 
 bwlib_rb_node_t null_node = {
-	0,NULL,NULL
+	-1,0,NULL,NULL
 };
 
 void rb_set_parent(bwlib_rb_node_t *node, bwlib_rb_node_t *p)
 {
 	node->parent  =  (node->parent & 3) | (unsigned long)(p);
+	//node->parent = p;
 }
 
 extern int bwlib_rb_init(bwlib_rb_root_t *root)
@@ -26,11 +27,10 @@ extern int bwlib_rb_init(bwlib_rb_root_t *root)
 	}
 	
 	root->root_node = &null_node; 
-	printf("rb init begin %x\n", root->root_node);
 	rb_set_parent(&null_node, &null_node); 
 	rb_set_black(&null_node);
 	null_node.rb_left = null_node.rb_right = &null_node;
-	printf("rb init\n");
+	return 0;
 }
 
 static bwlib_rb_node_t *rb_minmum(bwlib_rb_node_t *cur)
@@ -159,7 +159,7 @@ static void rb_right_rotate(bwlib_rb_root_t *root, bwlib_rb_node_t *node)
 }
 
 
-void bwlib_rb_insert_color(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
+extern void bwlib_rb_insert_color(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
 {
 	bwlib_rb_node_t *x, *y;
 	x = node; y = rb_parent(rb_parent(x));
@@ -186,7 +186,7 @@ void bwlib_rb_insert_color(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
 			}
 		} else {
 		/* x's father  is grandfather's right child */
-			y = y->rb_left;
+			y = rb_parent(rb_parent(x))->rb_left;
 			if (rb_is_red(y)) {	/* y is red */
 				rb_set_black(y);
 				rb_set_black(rb_parent(x));
@@ -254,7 +254,7 @@ extern void bwlib_rb_link_node(bwlib_rb_node_t *node, bwlib_rb_node_t *parent, b
 	return 0;
 } */
 
-static int rb_delete_fixup(bwlib_rb_root_t *root, bwlib_rb_node_t *node) 
+static void rb_delete_fixup(bwlib_rb_root_t *root, bwlib_rb_node_t *node) 
 {
 	bwlib_rb_node_t *x, *w;
 	x = node; 
@@ -328,7 +328,7 @@ static int rb_delete_fixup(bwlib_rb_root_t *root, bwlib_rb_node_t *node)
 
 void bwlib_rb_erase(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
 {
-	bwlib_rb_node_t *p, *d, *old;
+	bwlib_rb_node_t *p, *d, *old; /* p is the node to be delete, d is the next node */
 	int f = 0;
 	
 	old = node;
@@ -359,17 +359,20 @@ void bwlib_rb_erase(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
 
 	if (rb_is_black(p)) {
 		f = 1;
-	} else 
+	//	printf("delete: %d_b", p->key);
+	} else {
 		f = 0;
+	//	printf("delete: %d_r", p->key);
+	}
 
-	if (p != node) {
+	if (p != old) {
 		/* copy the date area to the new node */
 		p->parent = old->parent;
 		p->rb_left = old->rb_left;
 		p->rb_right = old->rb_right;
-		
+			
 		if (!is_null_node(rb_parent(old))) {
-			if (old ==  rb_parent(old)->rb_left) {
+			if (old == rb_parent(old)->rb_left) {
 				rb_parent(old)->rb_left = p;
 			} else {
 				rb_parent(old)->rb_right = p;
@@ -378,12 +381,13 @@ void bwlib_rb_erase(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
 			root->root_node = p;
 
 		rb_set_parent(old->rb_left, p);
-		if (!is_null_node(old->rb_right)) {
+		//if (!is_null_node(old->rb_right)) {
 			rb_set_parent(old->rb_right, p);
-		}
+		//}
 	}
 
 	if (f) {
+		/* printf("to fixup: %d ", d->key); */
 		rb_delete_fixup(root, d);
 	}
 }
