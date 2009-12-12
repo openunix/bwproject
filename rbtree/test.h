@@ -11,6 +11,6 @@ typedef struct mynode
 	bwlib_rb_node_t *node;
 }mynode;
 
-int dfs(bwlib_rb_node_t *root);
+void dfs(bwlib_rb_node_t *root);
 bwlib_rb_node_t *rb_lookup(bwlib_rb_root_t *root, int key);
 int rb_insert(bwlib_rb_root_t *root, bwlib_rb_node_t *node);

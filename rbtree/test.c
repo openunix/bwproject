@@ -3,37 +3,20 @@
 #include "../bwlib.h"
 #include "rbtree.h"
 
-int dfs(bwlib_rb_node_t *root)
+void dfs(bwlib_rb_node_t *root)
 {
-	int bhl ,bhr, flag;
-	if (!root) return 0;
 	if (is_null_node(root))
-		return 1;
+		return;
 	if (rb_is_black(root)) {
-		flag = 1;
-		//printf("%d_b ", rb_key(root));
+		printf("%d_b ", rb_key(root));
 	} else {
-		flag = 0;
-		//printf("%d_r ", rb_key(root)); 
+		printf("%d_r ", rb_key(root));
 	}
 
-	if (!flag && rb_is_red(root->rb_left)) {
-		printf("%d is red and %d is red\n", rb_key(root), rb_key(root->rb_left));
-	} else {
-		if (!flag && rb_is_red(root->rb_right)) {
-			printf("%d is red and %d is red\n", rb_key(root), rb_key(root->rb_right));
-		}
-	}
-
-	bhl = dfs(root->rb_left);
-	bhr = dfs(root->rb_right);
-	if (!bhl || !bhr) return 0;
-
-	if (bhl != bhr) {
-		printf("\n#############################\n%d bhl is not equal to bhr\n###############################\n", rb_key(root));
-		return 0;
-	} else 
-		return bhl+flag;
+	if (!is_null_node(root->rb_left)) 
+		dfs(root->rb_left);
+	if (!is_null_node(root->rb_right))
+		dfs(root->rb_right);
 }
 
 bwlib_rb_node_t *rb_lookup(bwlib_rb_root_t *root, int key)

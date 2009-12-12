@@ -23,16 +23,6 @@
 #define rb_is_red(x) (!rb_color(x))
 #define rb_is_black(x) (rb_color(x))
 
-
-/*
-#define rb_color(x) ((x)->color)
-#define rb_parent(x) ((x)->parent)
-#define rb_is_red(x) (!(rb_color(x)))
-#define rb_is_black(x) (rb_color(x))
-#define rb_set_red(x) ((x)->color = 0)
-#define rb_set_black(x) ((x)->color = 1)
-*/
-
 #define is_null_node(x) ((x) == &null_node)
 
 #endif
