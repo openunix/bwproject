@@ -31,7 +31,6 @@
 
 typedef struct bwlib_rb_node{
 	/* TODO: Add the define of rb node here */
-	int key;
 	unsigned long parent;
 	struct bwlib_rb_node *rb_left, *rb_right;
 }bwlib_rb_node_t;
