@@ -1,8 +1,24 @@
-/*
- * Project: rbtree 
- * Author: Liu Chang, Liu Chao, Shao Bingqing
- * Date: 2009/11/16 - 2009/12/6
+/* 
+ * Copyright (c) 2009 Tianjin Zhongke Blue Whale 
+ *               Information Technologies Co., Ltd
+ * 
+ * rbtree.c - implement of the functions 
+ * exported by bwlib.
+ * 
+ * Dependencies: None (Should be self-defined)
+ *
+ * ChangeLog:
+ *  2009-12-2 Initial Created
+ * ToDo:
+ *  None
  */
+
+ /* 
+  * Copyright (c) 2009 Institute of Computing Technology,
+  *                    Chinese Academy of Sciences
+  * 
+  * Author:  
+  */
 
 #ifndef RB_NODE
 #define RB_NODE

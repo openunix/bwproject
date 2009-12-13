@@ -1,3 +1,25 @@
+/* 
+ * Copyright (c) 2009 Tianjin Zhongke Blue Whale 
+ *               Information Technologies Co., Ltd
+ * 
+ * bwlib.h - This file contains all the function prototypes that are
+ * exported by bwlib.
+ * 
+ * Dependencies: None (Should be self-defined)
+ *
+ * ChangeLog:
+ *  2009-12-2 Initial Created
+ * ToDo:
+ *  None
+ */
+
+ /* 
+  * Copyright (c) 2009 Institute of Computing Technology,
+  *                    Chinese Academy of Sciences
+  * 
+  * Author:  
+  */
+
 #include <stdio.h>
 #include "test.h"
 #include "../bwlib.h"
@@ -6,11 +28,13 @@
 void dfs(bwlib_rb_node_t *root)
 {
 	if (is_null_node(root))
-		return;
+		return 1;
 	if (rb_is_black(root)) {
+		flag = 1;
 		printf("%d_b ", rb_key(root));
 	} else {
-		printf("%d_r ", rb_key(root));
+		flag = 0;
+		printf("%d_r ", rb_key(root)); 
 	}
 
 	if (!is_null_node(root->rb_left)) 
@@ -42,8 +66,13 @@ bwlib_rb_node_t *rb_lookup(bwlib_rb_root_t *root, int key)
 int rb_insert(bwlib_rb_root_t *root, bwlib_rb_node_t *node)
 {
 	bwlib_rb_node_t *p, *pp;
-	int key0;
-	int key = rb_key(node);
+	mynode *pa;
+	int key0 , key;
+	
+//	pa = bwlib_rb_entry(node, mynode, node);
+	pa = container_of((node), mynode, node);
+	key = pa->key;
+	
 
 	if (is_null_node(root->root_node)) {
 		root->root_node = node;

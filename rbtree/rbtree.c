@@ -1,10 +1,32 @@
+/* 
+ * Copyright (c) 2009 Tianjin Zhongke Blue Whale 
+ *               Information Technologies Co., Ltd
+ * 
+ * rbtree.c - implement of the functions 
+ * exported by bwlib.
+ * 
+ * Dependencies: None (Should be self-defined)
+ *
+ * ChangeLog:
+ *  2009-12-2 Initial Created
+ * ToDo:
+ *  None
+ */
+
+ /* 
+  * Copyright (c) 2009 Institute of Computing Technology,
+  *                    Chinese Academy of Sciences
+  * 
+  * Author:  
+  */
+
+
 #ifndef RB_TREE
 #define RB_TREE
 
 #include <stdio.h>
 #include <assert.h>
 #include "rbtree.h"
-#include "../bwlib.h"
 
 bwlib_rb_node_t null_node = {
 	0,NULL,NULL
@@ -378,9 +400,8 @@ void bwlib_rb_erase(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
 			root->root_node = p;
 
 		rb_set_parent(old->rb_left, p);
-		if (!is_null_node(old->rb_right)) {
-			rb_set_parent(old->rb_right, p);
-		}
+		rb_set_parent(old->rb_right, p);
+		
 	}
 
 	if (f) {
