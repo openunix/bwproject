@@ -9,8 +9,7 @@ typedef struct mynode
 	bwlib_rb_node_t *node;
 }mynode;
 
-//#define rb_key(x) ((x)->key)
-#define rb_key(x) ((bwlib((x), mynode, node))->key)
+#define rb_key(x) ((bwlib_rb_entry((x), mynode, node))->key)
 
 void dfs(bwlib_rb_node_t *root);
 bwlib_rb_node_t *rb_lookup(bwlib_rb_root_t *root, int key);

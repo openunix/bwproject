@@ -390,6 +390,7 @@ void bwlib_rb_erase(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
 
 extern void bwlib_rb_clear_node(bwlib_rb_node_t *node)
 {
+	rb_set_parent(node, node);
 }
 
 #endif
