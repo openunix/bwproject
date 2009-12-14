@@ -56,17 +56,7 @@ extern void bwlib_rb_link_node(bwlib_rb_node_t *, bwlib_rb_node_t *,
 #define EMPTY_ROOT -2
 #define container_of(ptr, type, member) ((type *)((char *)ptr - (char *)&((type *)0)->member))
 #define bwlib_rb_entry(ptr, type, member) container_of(ptr, type, member) 
-#define BWLIB_RB_ROOT (bwlib_rb_root_t) { NULL} 
-/*
-#define rb_color(x) ((x)->parent & 3)
-#define rb_parent(x) ((bwlib_rb_node_t *)((x)->parent & (~3)))
-#define rb_set_red(x) ((x)->parent &= ~1)
-#define rb_set_black(x) ((x)->parent |= 1) 
-#define rb_is_red(x) (!rb_color(x))
-#define rb_is_black(x) (rb_color(x))
-
-#define is_null_node(x) ((x) == &null_node)
-*/
+#define RB_ROOT	(struct rb_root) { NULL, }
 
 /* 
  * TODO: Add the radix tree define here.

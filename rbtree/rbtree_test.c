@@ -26,7 +26,7 @@ struct bwlib_rb_root perf_tree_root = RB_ROOT;
 
 static struct perf_node *search_node(struct bwlib_rb_root *root, int key)
 {
-	struct bwlib_rb_node *node = root->bwlib_rb_node;
+	struct bwlib_rb_node *node = root->root_node;
 
 	while (node) {
 		struct perf_node *data = container_of(node, struct perf_node, node);
@@ -43,7 +43,7 @@ static struct perf_node *search_node(struct bwlib_rb_root *root, int key)
 
 static int insert_node(struct bwlib_rb_root *root, struct perf_node *data)
 {
-	struct bwlib_rb_node **new = &(root->bwlib_rb_node), *parent = NULL;
+	struct bwlib_rb_node **new = &(root->root_node), *parent = NULL;
 
 	while (*new) {
 		struct perf_node *this = container_of(*new, struct perf_node, node);

@@ -1,26 +1,3 @@
-/* 
- * Copyright (c) 2009 Tianjin Zhongke Blue Whale 
- *               Information Technologies Co., Ltd
- * 
- * rbtree.c - implement of the functions 
- * exported by bwlib.
- * 
- * Dependencies: None (Should be self-defined)
- *
- * ChangeLog:
- *  2009-12-2 Initial Created
- * ToDo:
- *  None
- */
-
- /* 
-  * Copyright (c) 2009 Institute of Computing Technology,
-  *                    Chinese Academy of Sciences
-  * 
-  * Author:  
-  */
-
-
 #ifndef RB_TREE
 #define RB_TREE
 
@@ -28,390 +5,379 @@
 #include <assert.h>
 #include "rbtree.h"
 
-bwlib_rb_node_t null_node = {
-	0,NULL,NULL
-};
-
-void rb_set_parent(bwlib_rb_node_t *node, bwlib_rb_node_t *p)
+static void rb_left_rotate(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
 {
-	node->parent  =  (node->parent & 3) | (unsigned long)(p);
+	bwlib_rb_node_t *right = node->rb_right;
+	bwlib_rb_node_t *parent = rb_parent(node);
+
+	if ((node->rb_right = right->rb_left))
+		rb_set_parent(right->rb_left, node);
+	right->rb_left = node;
+
+	rb_set_parent(right, parent);
+
+	if (parent)
+	{
+		if (node == parent->rb_left)
+			parent->rb_left = right;
+		else
+			parent->rb_right = right;
+	}
+	else
+		root->root_node = right;
+	rb_set_parent(node, right);
 }
 
-extern int bwlib_rb_init(bwlib_rb_root_t *root)
+static void rb_right_rotate(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
 {
-	/* 
-	 * init a rbtree root, make it root_node point to the global null_node 
-	 * and now the tree have no data node 
-	 */
-	if (!root) {
-		return EMPTY_ROOT;
+	bwlib_rb_node_t *left = node->rb_left;
+	bwlib_rb_node_t *parent = rb_parent(node);
+
+	if ((node->rb_left = left->rb_right))
+		rb_set_parent(left->rb_right, node);
+	left->rb_right = node;
+
+	rb_set_parent(left, parent);
+
+	if (parent)
+	{
+		if (node == parent->rb_right)
+			parent->rb_right = left;
+		else
+			parent->rb_left = left;
 	}
-	
-	root->root_node = &null_node; 
-	printf("rb init begin %x\n", root->root_node);
-	rb_set_parent(&null_node, &null_node); 
-	rb_set_black(&null_node);
-	null_node.rb_left = null_node.rb_right = &null_node;
-	printf("rb init\n");
+	else
+		root->root_node = left;
+	rb_set_parent(node, left);
 }
 
-static bwlib_rb_node_t *rb_minmum(bwlib_rb_node_t *cur)
+void bwlib_rb_insert_color(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
 {
-	bwlib_rb_node_t *p = cur;
-	while (!is_null_node(p->rb_left)) {
-		p = p->rb_left;
+	bwlib_rb_node_t *parent, *gparent;
+
+	while ((parent = rb_parent(node)) && rb_is_red(parent))
+	{
+		gparent = rb_parent(parent);
+
+		if (parent == gparent->rb_left)
+		{
+			{
+				bwlib_rb_node_t *uncle = gparent->rb_right;
+				if (uncle && rb_is_red(uncle))
+				{
+					rb_set_black(uncle);
+					rb_set_black(parent);
+					rb_set_red(gparent);
+					node = gparent;
+					continue;
+				}
+			}
+
+			if (parent->rb_right == node)
+			{
+				bwlib_rb_node_t *tmp;
+				rb_left_rotate(parent, root);
+				tmp = parent;
+				parent = node;
+				node = tmp;
+			}
+
+			rb_set_black(parent);
+			rb_set_red(gparent);
+			rb_right_rotate(gparent, root);
+		} else {
+			{
+				bwlib_rb_node_t *uncle = gparent->rb_left;
+				if (uncle && rb_is_red(uncle))
+				{
+					rb_set_black(uncle);
+					rb_set_black(parent);
+					rb_set_red(gparent);
+					node = gparent;
+					continue;
+				}
+			}
+
+			if (parent->rb_left == node)
+			{
+				bwlib_rb_node_t *tmp;
+				rb_right_rotate(parent, root);
+				tmp = parent;
+				parent = node;
+				node = tmp;
+			}
+
+			rb_set_black(parent);
+			rb_set_red(gparent);
+			rb_left_rotate(gparent, root);
+		}
 	}
 
-	return p;
+	rb_set_black(root->root_node);
 }
 
-static bwlib_rb_node_t *rb_maxmum(bwlib_rb_node_t *cur)
+static void __rb_erase_color(bwlib_rb_node_t *node, bwlib_rb_node_t *parent,
+			     bwlib_rb_root_t *root)
 {
-	bwlib_rb_node_t *p = cur;
-	while (!is_null_node(cur->rb_right)) {
-		p = p->rb_right;
-	}
+	bwlib_rb_node_t *other;
 
-	return p;
+	while ((!node || rb_is_black(node)) && node != root->root_node)
+	{
+		if (parent->rb_left == node)
+		{
+			other = parent->rb_right;
+			if (rb_is_red(other))
+			{
+				rb_set_black(other);
+				rb_set_red(parent);
+				rb_left_rotate(parent, root);
+				other = parent->rb_right;
+			}
+			if ((!other->rb_left || rb_is_black(other->rb_left)) &&
+			    (!other->rb_right || rb_is_black(other->rb_right)))
+			{
+				rb_set_red(other);
+				node = parent;
+				parent = rb_parent(node);
+			}
+			else
+			{
+				if (!other->rb_right || rb_is_black(other->rb_right))
+				{
+					bwlib_rb_node_t *o_left;
+					if ((o_left = other->rb_left))
+						rb_set_black(o_left);
+					rb_set_red(other);
+					rb_right_rotate(other, root);
+					other = parent->rb_right;
+				}
+				rb_set_color(other, rb_color(parent));
+				rb_set_black(parent);
+				if (other->rb_right)
+					rb_set_black(other->rb_right);
+				rb_left_rotate(parent, root);
+				node = root->root_node;
+				break;
+			}
+		}
+		else
+		{
+			other = parent->rb_left;
+			if (rb_is_red(other))
+			{
+				rb_set_black(other);
+				rb_set_red(parent);
+				rb_right_rotate(parent, root);
+				other = parent->rb_left;
+			}
+			if ((!other->rb_left || rb_is_black(other->rb_left)) &&
+			    (!other->rb_right || rb_is_black(other->rb_right)))
+			{
+				rb_set_red(other);
+				node = parent;
+				parent = rb_parent(node);
+			}
+			else
+			{
+				if (!other->rb_left || rb_is_black(other->rb_left))
+				{
+					bwlib_rb_node_t *o_right;
+					if ((o_right = other->rb_right))
+						rb_set_black(o_right);
+					rb_set_red(other);
+					rb_left_rotate(other, root);
+					other = parent->rb_left;
+				}
+				rb_set_color(other, rb_color(parent));
+				rb_set_black(parent);
+				if (other->rb_left)
+					rb_set_black(other->rb_left);
+				rb_right_rotate(parent, root);
+				node = root->root_node;
+				break;
+			}
+		}
+	}
+	if (node)
+		rb_set_black(node);
 }
 
-extern bwlib_rb_node_t *bwlib_rb_next(bwlib_rb_node_t *cur)
+void bwlib_rb_erase(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
 {
-	bwlib_rb_node_t *p = cur;
-	if (!is_null_node(cur->rb_right)) {
-		return rb_minmum(cur->rb_right); 
+	bwlib_rb_node_t *child, *parent;
+	int color;
+
+	if (!node->rb_left)
+		child = node->rb_right;
+	else if (!node->rb_right)
+		child = node->rb_left;
+	else
+	{
+		bwlib_rb_node_t *old = node, *left;
+
+		node = node->rb_right;
+		while ((left = node->rb_left) != NULL)
+			node = left;
+		child = node->rb_right;
+		parent = rb_parent(node);
+		color = rb_color(node);
+
+		if (child)
+			rb_set_parent(child, parent);
+		if (parent == old) {
+			parent->rb_right = child;
+			parent = node;
+		} else
+			parent->rb_left = child;
+
+		node->parent = old->parent;
+		node->rb_right = old->rb_right;
+		node->rb_left = old->rb_left;
+
+		if (rb_parent(old))
+		{
+			if (rb_parent(old)->rb_left == old)
+				rb_parent(old)->rb_left = node;
+			else
+				rb_parent(old)->rb_right = node;
+		} else
+			root->root_node = node;
+
+		rb_set_parent(old->rb_left, node);
+		if (old->rb_right)
+			rb_set_parent(old->rb_right, node);
+		goto color;
 	}
-	
-	p = rb_parent(p);
-	while ( !is_null_node(p) && p == rb_parent(p)->rb_right ) {
-		p = rb_parent(p);		
+
+	parent = rb_parent(node);
+	color = rb_color(node);
+
+	if (child)
+		rb_set_parent(child, parent);
+	if (parent)
+	{
+		if (parent->rb_left == node)
+			parent->rb_left = child;
+		else
+			parent->rb_right = child;
 	}
-	
-	return p;
+	else
+		root->root_node = child;
+
+ color:
+	if (color == RB_BLACK)
+		__rb_erase_color(child, parent, root);
 }
 
-extern bwlib_rb_node_t *bwlib_rb_prev(bwlib_rb_node_t *cur)
-{
-	bwlib_rb_node_t *p = cur;
-	if (!is_null_node(cur->rb_left)) {
-		return rb_minmum(cur->rb_left); 
-	}
-	
-	p = rb_parent(p);
-	while ( !is_null_node(p) && p == rb_parent(p)->rb_left) {
-		p = rb_parent(p);		
-	}
-	
-	return p;
-}
-
+/*
+ * This function returns the first node (in sort order) of the tree.
+ */
 extern bwlib_rb_node_t *bwlib_rb_first(bwlib_rb_root_t *root)
 {
 	bwlib_rb_node_t	*n;
 
 	n = root->root_node;
-	if (is_null_node(n))
-		return &null_node;
-	while (!is_null_node(n->rb_left))
+	if (!n)
+		return NULL;
+	while (n->rb_left)
 		n = n->rb_left;
 	return n;
 }
 
 extern bwlib_rb_node_t *bwlib_rb_last(bwlib_rb_root_t *root)
 {
-	bwlib_rb_node_t *n;
+	bwlib_rb_node_t	*n;
+
 	n = root->root_node;
-	if (is_null_node(n))
-		return &null_node;
-	while (!is_null_node(n->rb_right))
+	if (!n)
+		return NULL;
+	while (n->rb_right)
 		n = n->rb_right;
 	return n;
-
 }
 
-static void rb_left_rotate(bwlib_rb_root_t *root, bwlib_rb_node_t *node)
+extern bwlib_rb_node_t *bwlib_rb_next(bwlib_rb_node_t *node)
 {
-	bwlib_rb_node_t *x, *y;
-	x = node; 
-	y = x->rb_right;
+	bwlib_rb_node_t *parent;
 
-	x->rb_right = y->rb_left;
-	if (!is_null_node(y->rb_left)) {
-		rb_set_parent(y->rb_left, x);
+	if (rb_parent(node) == node)
+		return NULL;
+
+	/* If we have a right-hand child, go down and then left as far
+	   as we can. */
+	if (node->rb_right) {
+		node = node->rb_right; 
+		while (node->rb_left)
+			node=node->rb_left;
+		return (bwlib_rb_node_t *)node;
 	}
-	rb_set_parent(y, rb_parent(x));
-	
-	if(is_null_node(rb_parent(x))) {
-		root->root_node = y;
+
+	/* No right-hand children.  Everything down and left is
+	   smaller than us, so any 'next' node must be in the general
+	   direction of our parent. Go up the tree; any time the
+	   ancestor is a right-hand child of its parent, keep going
+	   up. First time it's a left-hand child of its parent, said
+	   parent is our 'next' node. */
+	while ((parent = rb_parent(node)) && node == parent->rb_right)
+		node = parent;
+
+	return parent;
+}
+
+extern bwlib_rb_node_t *bwlib_rb_prev(bwlib_rb_node_t *node)
+{
+	bwlib_rb_node_t *parent;
+
+	if (rb_parent(node) == node)
+		return NULL;
+
+	/* If we have a left-hand child, go down and then right as far
+	   as we can. */
+	if (node->rb_left) {
+		node = node->rb_left; 
+		while (node->rb_right)
+			node=node->rb_right;
+		return (bwlib_rb_node_t *)node;
+	}
+
+	/* No left-hand children. Go up till we find an ancestor which
+	   is a right-hand child of its parent */
+	while ((parent = rb_parent(node)) && node == parent->rb_left)
+		node = parent;
+
+	return parent;
+}
+
+void rb_replace_node(bwlib_rb_node_t *victim, bwlib_rb_node_t *new,
+		     bwlib_rb_root_t *root)
+{
+	bwlib_rb_node_t *parent = rb_parent(victim);
+
+	/* Set the surrounding nodes to point to the replacement */
+	if (parent) {
+		if (victim == parent->rb_left)
+			parent->rb_left = new;
+		else
+			parent->rb_right = new;
 	} else {
-		if (x == rb_parent(x)->rb_left) {
-			rb_parent(x)->rb_left = y;
-		} else {
-			rb_parent(x)->rb_right = y;
-		}
+		root->root_node = new;
 	}
-	y->rb_left = x;
-	rb_set_parent(x, y);
+	if (victim->rb_left)
+		rb_set_parent(victim->rb_left, new);
+	if (victim->rb_right)
+		rb_set_parent(victim->rb_right, new);
+
+	/* Copy the pointers/colour from the victim to the replacement */
+	*new = *victim;
 }
 
-static void rb_right_rotate(bwlib_rb_root_t *root, bwlib_rb_node_t *node)
+void bwlib_rb_link_node(bwlib_rb_node_t * node, bwlib_rb_node_t * parent,
+				bwlib_rb_node_t ** rb_link)
 {
-	bwlib_rb_node_t *y, *x;
-	x = node;
-	y = x->rb_left;
+	node->parent= (unsigned long )parent;
+	node->rb_left = node->rb_right = NULL;
 
-	x->rb_left = y->rb_right;
-	if (!is_null_node(y->rb_right)) {
-		rb_set_parent(y->rb_right, x);
-	}
-	rb_set_parent(y, rb_parent(x));
-
-	if (is_null_node(rb_parent(x))) {
-		root->root_node = y;
-	} else {
-		if (x == rb_parent(x)->rb_right) {
-			rb_parent(x)->rb_right = y;
-		} else {
-			rb_parent(x)->rb_left = y;
-		}
-	}
-
-	y->rb_right = x;
-	rb_set_parent(x, y);
-}
-
-
-void bwlib_rb_insert_color(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
-{
-	bwlib_rb_node_t *x, *y;
-	x = node; y = rb_parent(rb_parent(x));
-	assert(!is_null_node(y));
-	while (rb_is_red(rb_parent(x))) {
-		if (rb_parent(x) == rb_parent(rb_parent(x))->rb_left) {	
-			/* x's father  is grandfather's left child */
-			y = rb_parent(rb_parent(x))->rb_right;	/* y is x's uncle node */
-			if (rb_is_red(y)) {	/* y is red */
-				rb_set_black(y);
-				rb_set_black(rb_parent(x));
-				/* rb_set_red(rb_parent(rb_parent(x))); */
-				rb_set_red(rb_parent(rb_parent(x)));
-				x = rb_parent(rb_parent(x));
-			} else {	/* y is black */
-				if (x == rb_parent(x)->rb_right) {
-					x = rb_parent(x);
-					rb_left_rotate(root, x);
-				} 
-				rb_set_red(rb_parent(rb_parent(x)));
-				rb_set_black(rb_parent(x));
-				rb_right_rotate(root, rb_parent(rb_parent(x)));
-				/* x = rb_parent(x); */
-			}
-		} else {
-		/* x's father  is grandfather's right child */
-			y = y->rb_left;
-			if (rb_is_red(y)) {	/* y is red */
-				rb_set_black(y);
-				rb_set_black(rb_parent(x));
-				rb_set_red(rb_parent(rb_parent(x)));
-				x = rb_parent(rb_parent(x));
-			} else {	/* y is black */
-				if (x == rb_parent(x)->rb_left) {
-					x = rb_parent(x);
-					rb_right_rotate(root, x);
-				} 
-				rb_set_red(rb_parent(rb_parent(x)));
-				rb_set_black(rb_parent(x));
-				rb_left_rotate(root, rb_parent(rb_parent(x)));
-			}
-		}
-	}
-	rb_set_black(root->root_node);
-}
-
-extern void bwlib_rb_link_node(bwlib_rb_node_t *node, bwlib_rb_node_t *parent, bwlib_rb_node_t **link)
-{
-	rb_set_parent(node, parent);
-	node->rb_left = node->rb_right = &null_node;
-	*link = node;
-}
-
-/* int rb_insert(bwlib_rb_root_t *root, bwlib_rb_node_t *node)
-{
-	bwlib_rb_node_t *p, *pp;
-	int key = node->key;
-
-	if (is_null_node(root->root_node)) {
-		root->root_node = node;
-		node->rb_left = node->rb_right = &null_node;
-		rb_set_parent(node, &null_node);
-		rb_set_black(node);
-		return 0;
-	}	
-
-	p = root->root_node;
-	pp = &null_node;
-	while (!is_null_node(p)) {
-		pp = p;
-		if (key == p->key) {
-			return KEY_EXIST;
-		}
-		if ( key < p->key) {
-			p = p->rb_left;
-		} else {
-			p = p->rb_right;
-		}
-	}
-	
-	if (key < pp->key) {
-		pp->rb_left = node;
-	} else {
-		pp->rb_right = node;
-	}
-
-	node->rb_left = node->rb_right = &null_node;
-	rb_set_parent(node, pp); 
-	rb_set_red(node);
-	if (rb_is_red(pp))
-		bwlib_rb_insert_color(root, node); 
-	return 0;
-} */
-
-static int rb_delete_fixup(bwlib_rb_root_t *root, bwlib_rb_node_t *node) 
-{
-	bwlib_rb_node_t *x, *w;
-	x = node; 
-	while (x != root->root_node && rb_is_black(x)) {
-		if (x == rb_parent(x)->rb_left) {	/* x is parent's left child */
-			w = rb_parent(x)->rb_right;		/* w is x's borther node */
-			if (rb_is_red(w)) {	/* w is red color node */
-				rb_set_black(w);
-				rb_set_red(rb_parent(x));
-				rb_left_rotate(root, rb_parent(x));
-				w = rb_parent(x)->rb_right;
-			} 
-			/* w is black node */
-			if (rb_is_black(w->rb_left) && rb_is_black(w->rb_right)) {
-				rb_set_red(w);
-				x = rb_parent(x);
-			} else {
-				/* one of w's child is not black */
-				if (rb_is_black(w->rb_right)) {
-					rb_set_black(w->rb_left);
-					rb_set_red(w);
-					rb_right_rotate(root, w);
-					w = rb_parent(x)->rb_right;
-				} 
-				/* now w's right child is red */
-				if (rb_is_red(rb_parent(x))) {
-					rb_set_red(w);
-				} else {
-					rb_set_black(w);
-				}
-				rb_set_black(rb_parent(x));
-				rb_set_black(w->rb_right);
-				rb_left_rotate(root, rb_parent(x));
-				x = root->root_node;
-			}
-		} else {	/* x is parent's rihgt child */
-			w = rb_parent(x)->rb_left;
-			if (rb_is_red(w)) {	/* w is red color node */
-				rb_set_black(w);
-				rb_set_red(rb_parent(x));
-				rb_right_rotate(root, rb_parent(x));
-				w = rb_parent(x)->rb_left;
-			} 
-			/* w is black node */
-			if (rb_is_black(w->rb_right) && rb_is_black(w->rb_left)) {
-				rb_set_red(w);
-				x = rb_parent(x);
-			} else {
-				/* one of w's child is not black */
-				if (rb_is_black(w->rb_left)) {
-					rb_set_black(w->rb_right);
-					rb_set_red(w);
-					rb_left_rotate(root, w);
-					w = rb_parent(x)->rb_left;
-				} 
-				/* now w's right child is red */
-				if (rb_is_red(rb_parent(x))) {
-					rb_set_red(w);
-				} else {
-					rb_set_black(w);
-				}
-				rb_set_black(rb_parent(x));
-				rb_set_black(w->rb_left);
-				rb_right_rotate(root, rb_parent(x));
-				x = root->root_node;
-			}
-		}
-	}
-	rb_set_black(x);
-}
-
-void bwlib_rb_erase(bwlib_rb_node_t *node, bwlib_rb_root_t *root)
-{
-	bwlib_rb_node_t *p, *d, *old;
-	int f = 0;
-	
-	old = node;
-	assert(!is_null_node(node));
-	if (is_null_node(node->rb_left) || is_null_node(node->rb_right)) {
-		p = node;	
-	} else {
-		p = bwlib_rb_next(node);
-	}
-
-	if (!is_null_node(p->rb_left)) {
-		d = p->rb_left;
-	} else {
-		d = p->rb_right;
-	}
-	/* if (!is_null_node(d)) */
-	rb_set_parent(d, rb_parent(p));
-	
-	if (is_null_node(rb_parent(p))) {
-		root->root_node = d;
-	} else {
-		if (p == rb_parent(p)->rb_right) {
-			rb_parent(p)->rb_right = d;
-		} else {
-			rb_parent(p)->rb_left = d;
-		}
-	}
-
-	if (rb_is_black(p)) {
-		f = 1;
-	} else 
-		f = 0;
-
-	if (p != node) {
-		/* copy the date area to the new node */
-		p->parent = old->parent;
-		p->rb_left = old->rb_left;
-		p->rb_right = old->rb_right;
-		
-		if (!is_null_node(rb_parent(old))) {
-			if (old ==  rb_parent(old)->rb_left) {
-				rb_parent(old)->rb_left = p;
-			} else {
-				rb_parent(old)->rb_right = p;
-			}
-		} else 
-			root->root_node = p;
-
-		rb_set_parent(old->rb_left, p);
-		rb_set_parent(old->rb_right, p);
-		
-	}
-
-	if (f) {
-		rb_delete_fixup(root, d);
-	}
-}
-
-extern void bwlib_rb_clear_node(bwlib_rb_node_t *node)
-{
-	rb_set_parent(node, node);
+	*rb_link = node;
 }
 
 #endif
