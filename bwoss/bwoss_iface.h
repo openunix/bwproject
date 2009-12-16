@@ -39,7 +39,7 @@
 #define INLINE inline
 #endif
 
-# include "F:/bwlib/bwoss/win_user/win_user_oss.h"
+# include "win_user/win_user_oss.h"
 
 /* 
  * Windows user space external fuctions
