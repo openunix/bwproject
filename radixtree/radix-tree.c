@@ -1,8 +1,9 @@
 #include "radix-tree.h"
-#include "stdlib.h"
+//#include "stdlib.h"
 //#include "stdio.h"
+#include "..\bwoss\bwoss_iface.h"
 
-uint32_t pow(uint32_t base,uint32_t exp)
+uint32_t bwlib_pow(uint32_t base,uint32_t exp)
 {
 	uint32_t result = base;
 	uint32_t i = 0;
@@ -20,7 +21,7 @@ uint32_t bwlib_radix_tree_maxindex(uint32_t height)
 	if(height<1) 
 		return 0;
 	else
-		return pow(RADIX_TREE_MAP_SIZE,height) -1;
+		return bwlib_pow(RADIX_TREE_MAP_SIZE,height)-1;
 }
 
 void bwlib_radix_tree_init(bwlib_radix_tree_root* root)
@@ -28,7 +29,7 @@ void bwlib_radix_tree_init(bwlib_radix_tree_root* root)
 	root->height = 0;
 	root->rnode =NULL;
 }
-void bwlib_bwlib_radix_tree_node_init(bwlib_radix_tree_node* node)
+void bwlib_radix_tree_node_init(bwlib_radix_tree_node* node)
 {
 		uint32_t i = 0;
 		node->count = 0 ;
@@ -57,9 +58,9 @@ uint32_t bwlib_radix_tree_extend(struct bwlib_radix_tree_root *root, uint32_t in
 
 	do {
 		uint32_t newheight;
-		if (!(node =(bwlib_radix_tree_node*) malloc(sizeof(bwlib_radix_tree_node))))
+		if (!(node =(bwlib_radix_tree_node*) bwoss_malloc(sizeof(bwlib_radix_tree_node))))
 			return RADIX_TREE_FAILED;
-		bwlib_bwlib_radix_tree_node_init(node);
+		bwlib_radix_tree_node_init(node);
 		/* Increase the height.*/
 		node->slots[0] = root->rnode;
 		newheight = root->height+1;
@@ -109,7 +110,7 @@ uint32_t bwlib_radix_tree_insert(struct bwlib_radix_tree_root *root,
 				/*printf("Memory Allocation failed!\n");*/
 				return RADIX_TREE_FAILED;
 			}
-		    bwlib_bwlib_radix_tree_node_init(slot);
+		   bwlib_radix_tree_node_init(slot);
 			slot->height = height;
 			if (node)   
 			{
@@ -194,7 +195,7 @@ void* bwlib_radix_tree_delete(struct bwlib_radix_tree_root *root, uint32_t index
 			 shift -= RADIX_TREE_MAP_SHIFT;
 			 height --;
 		 }
-		 free(parent_node->slots[offset]);
+		 bwoss_free(parent_node->slots[offset]);
 		 parent_node->slots[offset]=NULL;
 		 parent_node->count--;
 		 return parent_node;
