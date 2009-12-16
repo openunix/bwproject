@@ -30,11 +30,58 @@
 /* 
  * Windows user space defines and macros
  */
-# include "bwoss/win_user/win_user_oss.h"
+#define container_of(ptr, type, member)   ((type *)((char *)ptr - (char *)(&((type *)0)->member)))
+
+/* when use static inline*/ 
+#ifdef _MSC_VER
+#define INLINE __inline
+#else
+#define INLINE inline
+#endif
+
+# include "F:/bwlib/bwoss/win_user/win_user_oss.h"
 
 /* 
  * Windows user space external fuctions
  */
+
+static INLINE void *bwoss_malloc(unsigned int size)
+{
+	return malloc(size);
+}
+
+static INLINE void bwoss_free(void* ptr)
+{
+	free(ptr);
+} 
+
+static INLINE  void bwoss_initialize_lock()
+{
+    initialize_lock();
+}
+static INLINE  void bwoss_clean_lock()
+{
+	clean_lock();
+}
+
+/* locker functions*/        
+static INLINE  int bwoss_unlock_write()
+{
+       return unlock_write();
+}
+
+static INLINE int bwoss_lock_write()
+{
+      return lock_write();;
+}
+static INLINE  bwoss_unlock_read() 
+{
+	return unlock_read();
+}
+static INLINE  bwoss_lock_read()
+{
+    return lock_read();
+}  
 
 
 #elif defined BWOSS_WINDOWS_KERNEL
@@ -77,5 +124,5 @@
 /* 
  * Common external fuctions and macros
  */
-/*
+
 #endif /* _BWOSS_IFACE_H */
