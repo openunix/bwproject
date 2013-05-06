@@ -1,17 +1,3 @@
-/*
- *----------------------------------------------------------------------------
- *	LSI Corporation
- *	1621 Barber Lane
- *	Milpitas, California 95035
- *----------------------------------------------------------------------------
- * Copyright ?2004-2006, LSI Corporation All Rights Reserved.
- * LSI's source code is an unpublished work and the use of copyright
- * notice does not imply otherwise. This source code contains confidential,
- * trade secret material of LSI Corporation. Any attempt or
- * participation in deciphering, decoding, reverse engineering or
- * in any way altering the source code is strictly prohibited, unless the
- * prior written consent of LSI Corporation.
-=======
 /* 
  * Copyright (c) 2009 Tianjin Zhongke Blue Whale 
  *               Information Technologies Co., Ltd
